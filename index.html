@@ -3,89 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- 法拉利图标配置 -->
+    <link rel="icon" href="car-icon.png">
+    <link rel="apple-touch-icon" href="car-icon.png">
+    <meta name="apple-mobile-web-app-title" content="荣威控制">
+    <meta name="application-name" content="荣威控制">
+
     <title>荣威i6 MAX 远程控制</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            background: #1a1a2e;
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        h1 {
-            margin-bottom: 30px;
-            font-size: 24px;
-            color: #00d4ff;
-        }
-        .btn {
-            width: 100%;
-            height: 80px;
-            margin: 15px 0;
-            border: none;
-            border-radius: 12px;
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
-        }
-        .unlock {
-            background: linear-gradient(135deg, #28a745, #20c997);
-        }
-        .lock {
-            background: linear-gradient(135deg, #dc3545, #ff6b6b);
-        }
-        .start {
-            background: linear-gradient(135deg, #007bff, #6610f2);
-        }
-        #status {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #aaa;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #1a1a2e; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 400px; text-align: center; }
+        h1 { margin-bottom: 30px; font-size: 24px; color: #00d4ff; }
+        .btn { width: 100%; height: 80px; margin: 15px 0; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; transition: all 0.3s ease; }
+        .btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        .unlock { background: linear-gradient(135deg, #28a745, #20c997); }
+        .lock { background: linear-gradient(135deg, #dc3545, #ff6b6b); }
+        .start { background: linear-gradient(135deg, #007bff, #6610f2); }
+        #status { margin-top: 20px; font-size: 16px; color: #aaa; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🚗 荣威i6 MAX 远程控制</h1>
-        <button class="btn unlock" onclick="sendCommand('car/unlock', 'ON')">🔓 解锁（5秒自动锁）</button>
+        <button class="btn unlock" onclick="unlockAndAutoLock()">🔓 解锁（5秒自动锁）</button>
         <button class="btn lock" onclick="sendCommand('car/lock', 'ON')">🔒 立即锁车</button>
         <button class="btn start" onclick="sendCommand('car/start', 'ON')">🚀 远程启动</button>
         <div id="status"></div>
     </div>
 
     <script>
-        // =======13002882099=== 这里改成你自己的巴法云信息 ==========
-        const UID = ""; // 改成你自己的UID
-        const API_KEY = "91d3c06f8c6c486496f4526da1e5d512"; // 改成你自己的密钥
-        // ==============================================
+        // 改成你自己的巴法云信息
+        const UID = "13002882099";
+        const API_KEY = "91d3c06f8c6c486496f4526da1e5d512";
 
         async function sendCommand(topic, msg) {
             const statusEl = document.getElementById('status');
-            statusEl.textContent = "正在发送指令...";
-
             try {
                 const response = await fetch(`https://api.bafangyun.com/api/v1/push?uid=${UID}&topic=${topic}&msg=${msg}`);
                 const result = await response.json();
-
                 if (result.code === 200) {
                     statusEl.textContent = "✅ 指令发送成功！";
                 } else {
@@ -94,6 +54,17 @@
             } catch (error) {
                 statusEl.textContent = "❌ 网络错误，请检查手机网络";
             }
+        }
+
+        async function unlockAndAutoLock() {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = "正在解锁...";
+            await sendCommand('car/unlock', 'ON');
+            statusEl.textContent = "✅ 解锁成功，5秒后自动锁车";
+            setTimeout(() => {
+                sendCommand('car/lock', 'ON');
+                statusEl.textContent = "🔒 已自动锁车";
+            }, 5000);
         }
     </script>
 </body>
